@@ -175,22 +175,26 @@ void drawTriangle(bTriangle triangle) {
     // Use the shader program
     glUseProgram(shaderProgram);
 
-	// Normalize window coordinates to clip space coordinates
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	// Calculate half width and half height
+	float halfWidth = triangle.w / 2.0f;
+	float halfHeight = triangle.h / 2.0f;
+
+	// Convert screen coordinates to normalized device coordinates
 	float normalizedX = (2.0f * triangle.x) / screenWidth - 1.0f;
 	float normalizedY = 1.0f - (2.0f * triangle.y) / screenHeight;
-
-	// Define the scale factors for x and y axes
-	float scaleX = triangle.w; // Change this value as needed for scaling along the x-axis
-	float scaleY = triangle.h; // Change this value as needed for scaling along the y-axis
 
 	// Define the vertices of the triangle using normalized coordinates and scale
 	float vertices[] = {
 		// Vertex 1
-		normalizedX - 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
+		normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
 		// Vertex 2
-		normalizedX + 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
+		normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
 		// Vertex 3
-		normalizedX, normalizedY + 0.25f * scaleY, 0.0f
+		normalizedX, normalizedY + halfHeight / screenHeight, 0.0f
 	};
 
     // Create and bind VAO
@@ -218,6 +222,7 @@ void drawTriangle(bTriangle triangle) {
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 // Function to draw mutiple triangles
@@ -232,6 +237,10 @@ void drawTriangles(bTriangle *triangles, int size)
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Create and bind VAO
     GLuint vao;
@@ -255,23 +264,23 @@ void drawTriangles(bTriangle *triangles, int size)
         GLint triangleColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
         glUniform4f(triangleColorLocation, triangle.r, triangle.g, triangle.b, triangle.alpha);
 
-        // Normalize window coordinates to clip space coordinates
-        float normalizedX = (2.0f * triangle.x) / screenWidth - 1.0f;
-        float normalizedY = 1.0f - (2.0f * triangle.y) / screenHeight;
+		// Calculate half width and half height
+		float halfWidth = triangle.w / 2.0f;
+		float halfHeight = triangle.h / 2.0f;
 
-        // Define the scale factors for x and y axes
-        float scaleX = triangle.w; // Change this value as needed for scaling along the x-axis
-        float scaleY = triangle.h; // Change this value as needed for scaling along the y-axis
+		// Convert screen coordinates to normalized device coordinates
+		float normalizedX = (2.0f * triangle.x) / screenWidth - 1.0f;
+		float normalizedY = 1.0f - (2.0f * triangle.y) / screenHeight;
 
-        // Define the vertices of the triangle using normalized coordinates and scale
-        float vertices[] = {
-            // Vertex 1
-            normalizedX - 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-            // Vertex 2
-            normalizedX + 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-            // Vertex 3
-            normalizedX, normalizedY + 0.25f * scaleY, 0.0f
-        };
+		// Define the vertices of the triangle using normalized coordinates and scale
+		float vertices[] = {
+			// Vertex 1
+			normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+			// Vertex 2
+			normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+			// Vertex 3
+			normalizedX, normalizedY + halfHeight / screenHeight, 0.0f
+		};
 
         // Buffer data
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -283,6 +292,7 @@ void drawTriangles(bTriangle *triangles, int size)
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 // Function to draw a rectangle/square
@@ -297,25 +307,26 @@ void drawRect(bRect rect) {
     // Use the shader program
     glUseProgram(shaderProgram);
 
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
     // Normalize window coordinates to clip space coordinates
     float normalizedX = (2.0f * rect.x) / screenWidth - 1.0f;
     float normalizedY = 1.0f - (2.0f * rect.y) / screenHeight;
 
-    // Define the scale factors for x and y axes
-    float scaleX = rect.w; // Change this value as needed for scaling along the x-axis
-    float scaleY = rect.h; // Change this value as needed for scaling along the y-axis
+	// Calculate half width and half height
+	float halfWidth = rect.w / 2.0f;
+	float halfHeight = rect.h / 2.0f;
 
-    // Define the vertices of the square using normalized coordinates and scale
-    float vertices[] = {
-        // Vertex 1
-        normalizedX - 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-        // Vertex 2
-        normalizedX + 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-        // Vertex 3
-        normalizedX - 0.25f * scaleX, normalizedY + 0.25f * scaleY, 0.0f,
-        // Vertex 4
-        normalizedX + 0.25f * scaleX, normalizedY + 0.25f * scaleY, 0.0f
-    };
+	// Define the vertices of the square using normalized coordinates and scale
+	float vertices[] = {
+		// Positions       // Texture Coords
+		normalizedX + halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f,
+		normalizedX + halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f,
+		normalizedX - halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f,
+		normalizedX - halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f
+	};
 
     // Create and bind VAO
     GLuint vao;
@@ -337,78 +348,83 @@ void drawRect(bRect rect) {
     glUniform4f(squareColorLocation, rect.r, rect.g, rect.b, rect.alpha);
 
     // Draw the square
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // Draw using triangle strip with 4 vertices
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4); // Draw using triangle strip with 4 vertices
 
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 // Function to draw multiple rectangle/square
 void drawRects(bRect *rects, int size)
 {
-    // Create vertex and fragment shaders
-    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource2D);
-    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource2D);
+	// Create vertex and fragment shaders
+	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource2D);
+	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource2D);
 
-    // Link shaders into a shader program
-    GLuint shaderProgram = linkShaderProgram(vertexShader, fragmentShader);
+	// Link shaders into a shader program
+	GLuint shaderProgram = linkShaderProgram(vertexShader, fragmentShader);
 
-    // Use the shader program
-    glUseProgram(shaderProgram);
+	// Use the shader program
+	glUseProgram(shaderProgram);
 
-    // Create and bind VAO
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
-    // Create VBO
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// Create and bind VAO
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
-    // Set vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+	// Create VBO
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    // Loop through each rectangle
-    for (int i = 0; i < size; ++i) {
-        bRect rect = rects[i];
+	// Set vertex attribute pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
-        // Set uniform color variable in the shader
-        GLint triangleColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
-        glUniform4f(triangleColorLocation, rect.r, rect.g, rect.b, rect.alpha);
+	// set color location
+	GLint triangleColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
 
-        // Normalize window coordinates to clip space coordinates
-        float normalizedX = (2.0f * rect.x) / screenWidth - 1.0f;
-        float normalizedY = 1.0f - (2.0f * rect.y) / screenHeight;
+	// Loop through each rectangle
+	for (int i = 0; i < size; ++i) {
+		bRect rect = rects[i];
 
-        // Define the scale factors for x and y axes
-        float scaleX = rect.w; // Change this value as needed for scaling along the x-axis
-        float scaleY = rect.h; // Change this value as needed for scaling along the y-axis
+		// Set uniform color variable in the shader
+		glUniform4f(triangleColorLocation, rect.r, rect.g, rect.b, rect.alpha);
 
-        // Define the vertices of the square using normalized coordinates and scale
-        float vertices[] = {
-            // Vertex 1
-            normalizedX - 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-            // Vertex 2
-            normalizedX + 0.25f * scaleX, normalizedY - 0.25f * scaleY, 0.0f,
-            // Vertex 3
-            normalizedX - 0.25f * scaleX, normalizedY + 0.25f * scaleY, 0.0f,
-            // Vertex 4
-            normalizedX + 0.25f * scaleX, normalizedY + 0.25f * scaleY, 0.0f
-        };
+		// Normalize window coordinates to clip space coordinates
+		float normalizedX = (2.0f * rect.x) / screenWidth - 1.0f;
+		float normalizedY = 1.0f - (2.0f * rect.y) / screenHeight;
 
-        // Buffer data
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// Calculate half width and half height
+		float halfWidth = rect.w / 2.0f;
+		float halfHeight = rect.h / 2.0f;
 
-        // Draw the triangle
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
+		// Define the vertices of the square using normalized coordinates and scale
+		float vertices[] = {
+			// Positions       // Texture Coords
+			normalizedX + halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f,
+			normalizedX + halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f,
+			normalizedX - halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f,
+			normalizedX - halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f
+		};
 
-    // Clean up
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
+		// Buffer data
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		// Draw the triangle
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	}
+
+	// Clean up
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 // Function to draw a point
@@ -422,6 +438,10 @@ void drawPoint(bPoint point) {
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Normalize window coordinates to clip space coordinates for the point
     float normalizedX = (2.0f * point.x) / screenWidth - 1.0f;
@@ -452,12 +472,13 @@ void drawPoint(bPoint point) {
     glUniform4f(pointColorLocation, point.r, point.g, point.b, point.alpha);
 
     // Draw the point
-    glPointSize(point.size);
+    glPointSize(point.size / 2);
     glDrawArrays(GL_POINTS, 0, 1); // Draw a single point
 
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 // Function to draw multiple points
@@ -471,6 +492,10 @@ void drawPoints(bPoint *points, int size) {
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Create and bind VAO
     GLuint vao;
@@ -507,7 +532,7 @@ void drawPoints(bPoint *points, int size) {
         glUniform4f(pointColorLocation, point.r, point.g, point.b, point.alpha);
 
         // Set point size for the current point
-        glPointSize(point.size);
+        glPointSize(point.size / 2);
 
         // Draw the current point
         glDrawArrays(GL_POINTS, 0, 1);
@@ -516,6 +541,7 @@ void drawPoints(bPoint *points, int size) {
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 
@@ -530,6 +556,10 @@ void drawLine(bLine line) {
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Normalize window coordinates to clip space coordinates for the points
     float startX = (2.0f * line.x1) / screenWidth - 1.0f;
@@ -569,6 +599,7 @@ void drawLine(bLine line) {
     // Clean up
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+	glDeleteProgram(shaderProgram);
 }
 
 
@@ -583,6 +614,10 @@ void drawLines(bLine *lines, int size) {
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Create and bind VAO
     GLuint vao;
@@ -628,6 +663,7 @@ void drawLines(bLine *lines, int size) {
     // Clean up
     glDeleteBuffers(1, &vbo);
     glDeleteVertexArrays(1, &vao);
+	glDeleteProgram(shaderProgram);
 }
 
 void drawImage(bImage image) {
@@ -647,23 +683,19 @@ void drawImage(bImage image) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Create and compile the vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource2D, NULL);
-    glCompileShader(vertexShader);
-    
-    // Create and compile the fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSourceIMG, NULL);
-    glCompileShader(fragmentShader);
+	// Create vertex and fragment shaders
+	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource2D);
+	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSourceIMG);
 
-    // Create the shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glBindFragDataLocation(shaderProgram, 0, "outColor");
-    glLinkProgram(shaderProgram);
-    glUseProgram(shaderProgram);
+	// Link shaders into a shader program
+	GLuint shaderProgram = linkShaderProgram(vertexShader, fragmentShader);
+
+	// Use the shader program
+	glUseProgram(shaderProgram);
+
+	// delete shaders so no mem leak
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
     // Calculate half width and half height
     float halfWidth = image.width / 2.0f;
@@ -723,97 +755,102 @@ void drawImage(bImage image) {
 }
 
 void drawImages(bImage *images, int size) {
-    for (int i = 0; i < size; ++i) {
-        bImage image = images[i];
+	for (int i = 0; i < size; ++i) {
+		bImage image = images[i];
 
-        // Load the image
-        int width, height, channels;
-        unsigned char* image_data = stbi_load(image.fileName, &width, &height, &channels, 0);
-        if (!image_data) {
-            fprintf(stderr, "Failed to load image: %s\n", image.fileName);
-            continue; // Skip to the next image if loading fails
-        }
+		// Load the image
+		int width, height, channels;
+		unsigned char* image_data = stbi_load(image.fileName, &width, &height, &channels, 0);
+		if (!image_data) {
+			fprintf(stderr, "Failed to load image: %s\n", image.fileName);
+			stbi_image_free(image_data);
+			continue; // Skip to the next image if loading fails
+		}
 
-        // Generate OpenGL texture
-        GLuint textureID;
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Generate OpenGL texture
+		GLuint textureID;
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        // Create and compile the vertex shader
-        GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource2D, NULL);
-        glCompileShader(vertexShader);
-        
-        // Create and compile the fragment shader
-        GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSourceIMG, NULL);
-        glCompileShader(fragmentShader);
+		// Create and compile the vertex shader
+		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertexShader, 1, &vertexShaderSource2D, NULL);
+		glCompileShader(vertexShader);
 
-        // Create the shader program
-        GLuint shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glBindFragDataLocation(shaderProgram, 0, "outColor");
-        glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);
+		// Create and compile the fragment shader
+		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragmentShader, 1, &fragmentShaderSourceIMG, NULL);
+		glCompileShader(fragmentShader);
 
-        // Calculate half width and half height
-        float halfWidth = image.width / 2.0f;
-        float halfHeight = image.height / 2.0f;
+		// Create the shader program
+		GLuint shaderProgram = glCreateProgram();
+		glAttachShader(shaderProgram, vertexShader);
+		glAttachShader(shaderProgram, fragmentShader);
+		glBindFragDataLocation(shaderProgram, 0, "outColor");
+		glLinkProgram(shaderProgram);
+		glUseProgram(shaderProgram);
 
-        // Convert screen coordinates to normalized device coordinates
-        float normalizedX = (2.0f * image.x) / screenWidth - 1.0f;
-        float normalizedY = 1.0f - (2.0f * image.y) / screenHeight;
+		// delete shaders so no mem leak
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 
-        // Specify the vertex data
-        float vertices[] = {
-            // Positions       // Texture Coords
-            normalizedX + halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    1.0f, 0.0f,   // Top Right
-            normalizedX + halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    1.0f, 1.0f,   // Bottom Right
-            normalizedX - halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f, 1.0f,   // Bottom Left
-            normalizedX - halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f, 0.0f    // Top Left 
-        };
+		// Calculate half width and half height
+		float halfWidth = image.width / 2.0f;
+		float halfHeight = image.height / 2.0f;
 
-        unsigned int indices[] = {
-            0, 1, 3,   // First triangle
-            1, 2, 3    // Second triangle
-        };
+		// Convert screen coordinates to normalized device coordinates
+		float normalizedX = (2.0f * image.x) / screenWidth - 1.0f;
+		float normalizedY = 1.0f - (2.0f * image.y) / screenHeight;
 
-        // Create Vertex Buffer Object (VBO) and Vertex Array Object (VAO)
-        GLuint VBO, VAO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-        
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		// Specify the vertex data
+		float vertices[] = {
+			// Positions       // Texture Coords
+			normalizedX + halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    1.0f, 0.0f,   // Top Right
+			normalizedX + halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    1.0f, 1.0f,   // Bottom Right
+			normalizedX - halfWidth / screenWidth,  normalizedY - halfHeight / screenHeight,    0.0f, 1.0f,   // Bottom Left
+			normalizedX - halfWidth / screenWidth,  normalizedY + halfHeight / screenHeight,    0.0f, 0.0f    // Top Left 
+		};
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		unsigned int indices[] = {
+			0, 1, 3,   // First triangle
+			1, 2, 3    // Second triangle
+		};
 
-        // Position attribute
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        
-        // Texture attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+		// Create Vertex Buffer Object (VBO) and Vertex Array Object (VAO)
+		GLuint VBO, VAO, EBO;
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &EBO);
 
-        // Render the texture
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        // Cleanup
-        glDeleteTextures(1, &textureID);
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        glDeleteProgram(shaderProgram);
-        stbi_image_free(image_data);
-    }
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		// Position attribute
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// Texture attribute
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// Render the texture
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		// Cleanup
+		glDeleteTextures(1, &textureID);
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+		glDeleteProgram(shaderProgram);
+		stbi_image_free(image_data);
+	}
 }
