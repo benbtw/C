@@ -30,6 +30,13 @@ size_t resizeVector(vector *v, size_t n)
             v->data = temp;
             v->size = n;
         }
+        else
+        {
+            // Free the original memory block to avoid memory leak
+            free(v->data);
+            v->data = NULL;
+            v->size = 0;
+        }
         return v->size;
     }
     return 0;
