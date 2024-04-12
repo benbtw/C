@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "stdbool.h": "c",
+        "glew.h": "c",
+        "stb_image.h": "c",
+        "xiosbase": "c"
+    }
+}
