@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 // window handling
 void rendererInit();
@@ -53,6 +54,24 @@ typedef struct bImage
     const char *fileName;
     int x, y;
     int width, height;
+    int sX, sY, sW, sH; // source x, y, w, h for spritesheets
+    int imageW, imageH; // needed for spritesheets and in general now maybe,
+                        // i should change due to the declaration being messy as fuck
+                        /*
+                            ie. (this displays the entire image)
+                            bImage image;
+                            image.fileName = "src/PlayerSheet.png";
+                            image.x = 100;
+                            image.y = 100;
+                            image.width = 198;
+                            image.height = 288;
+                            image.sX = 0;
+                            image.sY = 0;
+                            image.sW = 198;
+                            image.sH = 288;
+                            image.imageW = 198;
+                            image.imageH = 288;
+                        */
 } bImage;
 
 typedef struct bTriangle
@@ -78,5 +97,7 @@ void drawLines(bLine *lines, int size);
 
 void drawImage(bImage image);
 void drawImages(bImage *images, int size);
+
+// 3D rendering
 
 #endif
