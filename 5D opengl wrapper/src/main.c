@@ -27,8 +27,15 @@ int main()
     float lastFrame = 0;
     int speed = 300;
 
+    float gravity = -4.0f;
+    int jumpTimer = 0;
+    bool isGrounded = false;
+    bool isJumping = false;
+
     while (Running(window))
     {
+        if (!isGrounded)
+            rects[0].y -= gravity;
 
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -45,8 +52,21 @@ int main()
             Move(&rects[0].x, &rects[0].y, 0, -speed, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
             Move(&rects[0].x, &rects[0].y, 0, speed, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && isGrounded)
+            isJumping = true;
+
+        // jumpSpeed = speed at which you go up, maxTimer = how long for the jump "animation"
+        jump(&rects[0], &gravity, &jumpTimer, 30, 1000, &isJumping, deltaTime);
 
         cs = checkCollision(&rects[0], &rects[1]);
+
+        if (rects[0].y >= 500)
+        {
+            isGrounded = true;
+            isJumping = false;
+        }
+        else
+            isGrounded = false;
 
         switch (cs)
         {

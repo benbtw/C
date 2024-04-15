@@ -50,3 +50,20 @@ void Move(int *x, int *y, int speedX, int speedY, float dt)
         *y += speedY * dt;
     }
 }
+
+void jump(bRect *rect, float *gravity, int *jumpTimer, int maxTimer, int jumpSpeed, bool *isJumping, float deltaTime)
+{
+    // Apply jumping logic
+    if (*isJumping)
+    {
+        *gravity = 0;                     // Set gravity to 0 while jumping
+        rect->y -= jumpSpeed * deltaTime; // Simulate upward movement
+        (*jumpTimer)++;
+        if (*jumpTimer == maxTimer)
+        {
+            *jumpTimer = 0;
+            *gravity = -4.0f;   // Reset gravity after jump is complete
+            *isJumping = false; // Reset jump flag
+        }
+    }
+}

@@ -11,7 +11,10 @@
 #include <assert.h>
 #include <string.h>
 
+////////////////////////////////////////
 // window handling
+////////////////////////////////////////
+
 void rendererInit();
 GLFWwindow *initWindow(const char *title, int w, int h);
 bool Running(GLFWwindow *window);
@@ -22,7 +25,9 @@ void clearRenderer();
 void rendererPollEvents(GLFWwindow *window);
 extern bool escapeCanClose;
 
+////////////////////////////////////////
 // 2D rendering shapes/objects
+////////////////////////////////////////
 
 typedef struct bRect
 {
@@ -82,7 +87,10 @@ typedef struct bTriangle
     float alpha;
 } bTriangle;
 
+////////////////////////////////////////
 // 2D rendering functions
+////////////////////////////////////////
+
 void drawTriangle(bTriangle triangle);
 void drawTriangles(bTriangle *triangles, int size);
 
@@ -98,6 +106,8 @@ void drawLines(bLine *lines, int size);
 void drawImage(bImage image);
 void drawImages(bImage *images, int size);
 
+////////////////////////////////////////
 // 3D rendering
+////////////////////////////////////////
 
 #endif
