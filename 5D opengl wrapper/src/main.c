@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "physics.h"
 
 int main()
 {
@@ -14,13 +15,17 @@ int main()
 
     escapeCanClose = true; // set if you want escape to close the window
 
-    bRect rect = {200, 200, 64, 64, 1.0f, 0.0f, 0.0f, 1.0f};
+    bRect rects[2] = {{200, 200, 64, 64, 1.0f, 0.0f, 0.0f, 1.0f},
+                      {400, 200, 64, 64, 0.0f, 0.0f, 1.0f, 1.0f}};
+
+    CollisionSide cs;
 
     glClearColor(0.5, 0.5, 0.5, 1);
 
     float currentFrame = 0;
     float deltaTime = 0;
     float lastFrame = 0;
+    int speed = 300;
 
     while (Running(window))
     {
@@ -32,19 +37,48 @@ int main()
         if (deltaTime > 0.16)
             deltaTime = 0.16;
 
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            Move(&rects[0].x, &rects[0].y, -speed, 0, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            Move(&rects[0].x, &rects[0].y, speed, 0, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            Move(&rects[0].x, &rects[0].y, 0, -speed, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            Move(&rects[0].x, &rects[0].y, 0, speed, deltaTime);
+
+        cs = checkCollision(&rects[0], &rects[1]);
+
+        switch (cs)
+        {
+        case COLLISION_TOP:
+            // Handle collision with the top side
+            rects[0].y = rects[1].y + rects[1].h; // Adjust y position to stop at the bottom side
+            break;
+        case COLLISION_BOTTOM:
+            // Handle collision with the bottom side
+            rects[0].y = rects[1].y - rects[0].h; // Adjust y position to stop at the top side
+            break;
+        case COLLISION_LEFT:
+            // Handle collision with the left side
+            rects[0].x = rects[1].x + rects[1].w; // Adjust x position to stop at the right side
+            break;
+        case COLLISION_RIGHT:
+            // Handle collision with the right side
+            rects[0].x = rects[1].x - rects[0].w; // Adjust x position to stop at the left side
+            break;
+        case NO_COLLISION:
+            // No collision
+            break;
+        }
+
         clearRenderer();
 
         // rendering functions go here
-        drawRect(rect);
+        drawRects(rects, 2);
 
         glfwSwapBuffers(window);
 
         rendererPollEvents(window);
-
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            rect.x -= 5 * deltaTime;
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            rect.x += 5 * deltaTime + 1; // + 1 to fix weird no movement?
     }
 
     cleanRenderer(window);

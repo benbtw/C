@@ -3,6 +3,8 @@
         "stdbool.h": "c",
         "glew.h": "c",
         "stb_image.h": "c",
-        "xiosbase": "c"
+        "xiosbase": "c",
+        "cmath": "cpp",
+        "physics.h": "c"
     }
 }

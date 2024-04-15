@@ -185,9 +185,9 @@ void drawTriangle(bTriangle triangle)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // Calculate half width and half height
-    float halfWidth = triangle.w / 2.0f;
-    float halfHeight = triangle.h / 2.0f;
+    // Calculate full width and full height
+    float fullWidth = triangle.w;
+    float fullHeight = triangle.h;
 
     // Convert screen coordinates to normalized device coordinates
     float normalizedX = (2.0f * triangle.x) / screenWidth - 1.0f;
@@ -196,11 +196,11 @@ void drawTriangle(bTriangle triangle)
     // Define the vertices of the triangle using normalized coordinates and scale
     float vertices[] = {
         // Vertex 1
-        normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+        normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
         // Vertex 2
-        normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+        normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
         // Vertex 3
-        normalizedX, normalizedY + halfHeight / screenHeight, 0.0f};
+        normalizedX, normalizedY + fullHeight / screenHeight, 0.0f};
 
     // Create and bind VAO
     GLuint vao;
@@ -270,9 +270,9 @@ void drawTriangles(bTriangle *triangles, int size)
         GLint triangleColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
         glUniform4f(triangleColorLocation, triangle.r, triangle.g, triangle.b, triangle.alpha);
 
-        // Calculate half width and half height
-        float halfWidth = triangle.w / 2.0f;
-        float halfHeight = triangle.h / 2.0f;
+        // Calculate full width and full height
+        float fullWidth = triangle.w;
+        float fullHeight = triangle.h;
 
         // Convert screen coordinates to normalized device coordinates
         float normalizedX = (2.0f * triangle.x) / screenWidth - 1.0f;
@@ -281,11 +281,11 @@ void drawTriangles(bTriangle *triangles, int size)
         // Define the vertices of the triangle using normalized coordinates and scale
         float vertices[] = {
             // Vertex 1
-            normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+            normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
             // Vertex 2
-            normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
+            normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
             // Vertex 3
-            normalizedX, normalizedY + halfHeight / screenHeight, 0.0f};
+            normalizedX, normalizedY + fullHeight / screenHeight, 0.0f};
 
         // Buffer data
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -321,17 +321,17 @@ void drawRect(bRect rect)
     float normalizedX = (2.0f * rect.x) / screenWidth - 1.0f;
     float normalizedY = 1.0f - (2.0f * rect.y) / screenHeight;
 
-    // Calculate half width and half height
-    float halfWidth = rect.w / 2.0f;
-    float halfHeight = rect.h / 2.0f;
+    // Calculate full width and full height
+    float fullWidth = rect.w;
+    float fullHeight = rect.h;
 
     // Define the vertices of the square using normalized coordinates and scale
     float vertices[] = {
         // Positions       // Texture Coords
-        normalizedX + halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, 0.0f,
-        normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
-        normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
-        normalizedX - halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, 0.0f};
+        normalizedX + fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, 0.0f,
+        normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
+        normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
+        normalizedX - fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, 0.0f};
 
     // Create and bind VAO
     GLuint vao;
@@ -407,17 +407,17 @@ void drawRects(bRect *rects, int size)
         float normalizedX = (2.0f * rect.x) / screenWidth - 1.0f;
         float normalizedY = 1.0f - (2.0f * rect.y) / screenHeight;
 
-        // Calculate half width and half height
-        float halfWidth = rect.w / 2.0f;
-        float halfHeight = rect.h / 2.0f;
+        // Calculate full width and full height (no longer full width turns out im a dumbass)
+        float fullWidth = rect.w;
+        float fullHeight = rect.h;
 
         // Define the vertices of the square using normalized coordinates and scale
         float vertices[] = {
             // Positions       // Texture Coords
-            normalizedX + halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, 0.0f,
-            normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
-            normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, 0.0f,
-            normalizedX - halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, 0.0f};
+            normalizedX + fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, 0.0f,
+            normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
+            normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, 0.0f,
+            normalizedX - fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, 0.0f};
 
         // Buffer data
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -705,9 +705,9 @@ void drawImage(bImage image)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // Calculate half width and half height
-    float halfWidth = image.width / 2.0f;
-    float halfHeight = image.height / 2.0f;
+    // Calculate full width and full height
+    float fullWidth = image.width;
+    float fullHeight = image.height;
 
     // Convert screen coordinates to normalized device coordinates
     float normalizedX = (2.0f * image.x) / screenWidth - 1.0f;
@@ -721,10 +721,10 @@ void drawImage(bImage image)
     // Specify the vertex data
     float vertices[] = {
         // Positions       // Texture Coords
-        normalizedX + halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, texX2, texY1, // Top Right
-        normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, texX2, texY2, // Bottom Right
-        normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, texX1, texY2, // Bottom Left
-        normalizedX - halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, texX1, texY1  // Top Left
+        normalizedX + fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, texX2, texY1, // Top Right
+        normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, texX2, texY2, // Bottom Right
+        normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, texX1, texY2, // Bottom Left
+        normalizedX - fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, texX1, texY1  // Top Left
     };
 
     unsigned int indices[] = {
@@ -813,9 +813,9 @@ void drawImages(bImage *images, int size)
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-        // Calculate half width and half height
-        float halfWidth = image.width / 2.0f;
-        float halfHeight = image.height / 2.0f;
+        // Calculate full width and full height
+        float fullWidth = image.width;
+        float fullHeight = image.height;
 
         // Convert screen coordinates to normalized device coordinates
         float normalizedX = (2.0f * image.x) / screenWidth - 1.0f;
@@ -829,10 +829,10 @@ void drawImages(bImage *images, int size)
         // Specify the vertex data
         float vertices[] = {
             // Positions       // Texture Coords
-            normalizedX + halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, texX2, texY1, // Top Right
-            normalizedX + halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, texX2, texY2, // Bottom Right
-            normalizedX - halfWidth / screenWidth, normalizedY - halfHeight / screenHeight, texX1, texY2, // Bottom Left
-            normalizedX - halfWidth / screenWidth, normalizedY + halfHeight / screenHeight, texX1, texY1  // Top Left
+            normalizedX + fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, texX2, texY1, // Top Right
+            normalizedX + fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, texX2, texY2, // Bottom Right
+            normalizedX - fullWidth / screenWidth, normalizedY - fullHeight / screenHeight, texX1, texY2, // Bottom Left
+            normalizedX - fullWidth / screenWidth, normalizedY + fullHeight / screenHeight, texX1, texY1  // Top Left
         };
 
         unsigned int indices[] = {
