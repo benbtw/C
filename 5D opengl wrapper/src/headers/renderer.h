@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
+#include "physics.h"
 
 ////////////////////////////////////////
 // window handling
@@ -24,68 +25,6 @@ void clearRenderer();
 // "input handling" (not full input just some helper stuff)
 void rendererPollEvents(GLFWwindow *window);
 extern bool escapeCanClose;
-
-////////////////////////////////////////
-// 2D rendering shapes/objects
-////////////////////////////////////////
-
-typedef struct bRect
-{
-    int x, y;
-    float w, h;
-    float r, g, b;
-    float alpha;
-} bRect;
-
-typedef struct bLine
-{
-    int x1, y1;
-    int x2, y2;
-    int width;
-    float r, g, b;
-    float alpha;
-} bLine;
-
-typedef struct bPoint
-{
-    int x, y;
-    float size;
-    float r, g, b;
-    float alpha;
-} bPoint;
-
-typedef struct bImage
-{
-    const char *fileName;
-    int x, y;
-    int width, height;
-    int sX, sY, sW, sH; // source x, y, w, h for spritesheets
-    int imageW, imageH; // needed for spritesheets and in general now maybe,
-                        // i should change due to the declaration being messy as fuck
-                        /*
-                            ie. (this displays the entire image)
-                            bImage image;
-                            image.fileName = "src/PlayerSheet.png";
-                            image.x = 100;
-                            image.y = 100;
-                            image.width = 198;
-                            image.height = 288;
-                            image.sX = 0;
-                            image.sY = 0;
-                            image.sW = 198;
-                            image.sH = 288;
-                            image.imageW = 198;
-                            image.imageH = 288;
-                        */
-} bImage;
-
-typedef struct bTriangle
-{
-    int x, y;
-    float w, h;
-    float r, g, b;
-    float alpha;
-} bTriangle;
 
 ////////////////////////////////////////
 // 2D rendering functions
@@ -109,5 +48,13 @@ void drawImages(bImage *images, int size);
 ////////////////////////////////////////
 // 3D rendering
 ////////////////////////////////////////
+
+// most likely pass in a model, projection a maybe a bCube struct?
+// view might not need to be passed since its basically the camera
+// however model and projection are basically essential to seeing and changing the object
+// ie. void drawCube(bCube cube, mat4 model, mat4 projection); probably every shape will be like this
+// do batch rendering for drawing multiple cubes (and other 3D objects) probably
+void drawCube(bCube cube, mat4 model, mat4 view, mat4 projection, bColor color);
+void drawCubes(bCube *cubes, int cubeSize, mat4 model, mat4 view, mat4 projection);
 
 #endif

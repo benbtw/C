@@ -67,3 +67,82 @@ void jump(bRect *rect, float *gravity, int *jumpTimer, int maxTimer, int jumpSpe
         }
     }
 }
+
+void moveCamera(cameraDirections direction, float cameraSpeed, vec3 *cameraPos, vec3 *cameraFront, vec3 *cameraUp)
+{
+    switch (direction)
+    {
+    case CAMERA_UP:
+        glm_vec3_add(*cameraPos, (vec3){cameraFront[0][0] * cameraSpeed, cameraFront[0][1] * cameraSpeed, cameraFront[0][2] * cameraSpeed}, *cameraPos);
+        break;
+    case CAMERA_DOWN:
+        glm_vec3_sub(*cameraPos, (vec3){cameraFront[0][0] * cameraSpeed, cameraFront[0][1] * cameraSpeed, cameraFront[0][2] * cameraSpeed}, *cameraPos);
+        break;
+    case CAMERA_LEFT:
+        vec3 left;
+        glm_vec3_cross(*cameraFront, *cameraUp, left);
+        glm_normalize_to(left, left);
+        glm_vec3_scale(left, cameraSpeed, left);
+        glm_vec3_sub(*cameraPos, left, *cameraPos);
+        break;
+    case CAMERA_RIGHT:
+        vec3 right;
+        glm_vec3_cross(*cameraFront, *cameraUp, right);
+        glm_normalize_to(right, right);
+        glm_vec3_scale(right, cameraSpeed, right);
+        glm_vec3_add(*cameraPos, right, *cameraPos);
+        break;
+    case CAMERA_NONE:
+        break;
+    }
+}
+
+float lastX = 960.0f / 2.0f;
+float lastY = 640.0f / 2.0f;
+bool firstMouse = true;
+
+void moveCameraMouse(double xpos, double ypos, float *horizontal, float *vertical, vec3 *cameraFront)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // Reversed since y-coordinates range from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    *horizontal += xoffset;
+    *vertical += yoffset;
+
+    // Clamp pitch to prevent the camera from flipping upside down
+    if (*vertical > 89.0f)
+        *vertical = 89.0f;
+    if (*vertical < -89.0f)
+        *vertical = -89.0f;
+
+    // Update camera front vector based on yaw and pitch
+    vec3 front;
+    front[0] = cos(glm_rad(*horizontal)) * cos(glm_rad(*vertical));
+    front[1] = sin(glm_rad(*vertical));
+    front[2] = sin(glm_rad(*horizontal)) * cos(glm_rad(*vertical));
+    glm_normalize_to(front, *cameraFront);
+}
+
+void updateCameraPos(mat4 *view, vec3 *cameraPos, vec3 *cameraFront, vec3 *cameraUp)
+{
+    glm_lookat(*cameraPos, (vec3){cameraPos[0][0] + cameraFront[0][0], cameraPos[0][1] + cameraFront[0][1], cameraPos[0][2] + cameraFront[0][2]}, *cameraUp, *view);
+}
+
+// Update projection matrix based on window size and FOV
+void setFov(float FOV, mat4 *projection, int screenWidth, int screenHeight) {
+    float aspectRatio = (float)screenWidth / (float)screenHeight;
+    glm_perspective(glm_rad(FOV), aspectRatio, 0.1f, 100.0f, *projection);
+}

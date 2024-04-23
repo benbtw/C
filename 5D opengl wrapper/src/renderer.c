@@ -1,13 +1,17 @@
 #include "renderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 // variable defines
 bool escapeCanClose = false;
 
 int screenWidth = 0;
 int screenHeight = 0;
+
+////////////////////////////////////////
+// window handling
+////////////////////////////////////////
 
 // Function to handle GLFW errors
 void errorCallback(int error, const char *description)
@@ -29,6 +33,7 @@ void rendererInit()
 void rendererPollEvents(GLFWwindow *window)
 {
     glfwPollEvents();
+    glfwWaitEventsTimeout(0.007); // fix weird input lag/choppy-ness
 
     if (escapeCanClose)
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -95,7 +100,9 @@ bool Running(GLFWwindow *window)
     return true;
 }
 
+////////////////////////////////////////
 // 2D Rendering
+////////////////////////////////////////
 
 // 2D Vertex shader source code
 const char *vertexShaderSource2D = {
@@ -126,6 +133,28 @@ const char *fragmentShaderSourceIMG = {
     "void main() {\n"
     "   FragColor = texture(imageTexture, TexCoord);\n"
     "}\0"};
+
+// 3d shaders
+const char *vertexShaderSource3D = "#version 330 core\n"
+                                   "layout (location = 0) in vec3 aPos;\n"
+                                   "out vec3 FragPos;\n"
+                                   "uniform mat4 model;\n"
+                                   "uniform mat4 view;\n"
+                                   "uniform mat4 projection;\n"
+                                   "void main()\n"
+                                   "{\n"
+                                   "    gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+                                   "    FragPos = vec3(model * vec4(aPos, 1.0));\n"
+                                   "}\0";
+
+const char *fragmentShaderSource3D = "#version 330 core\n"
+                                     "out vec4 FragColor;\n"
+                                     "uniform vec4 shapeColor;\n"
+                                     "in vec3 FragPos;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "    FragColor = shapeColor;\n"
+                                     "}\n\0";
 
 // Function to compile shader
 GLuint compileShader(GLenum shaderType, const char *shaderSource)
@@ -167,6 +196,10 @@ GLuint linkShaderProgram(GLuint vertexShader, GLuint fragmentShader)
 
     return shaderProgram;
 }
+
+////////////////////////////////////////
+// 2D rendering functions
+////////////////////////////////////////
 
 // Function to draw a triangle
 void drawTriangle(bTriangle triangle)
@@ -874,4 +907,194 @@ void drawImages(bImage *images, int size)
         glDeleteProgram(shaderProgram);
         stbi_image_free(image_data);
     }
+}
+
+////////////////////////////////////////
+// 3D Rendering
+////////////////////////////////////////
+
+void drawCube(bCube cube, mat4 model, mat4 view, mat4 projection, bColor color)
+{
+    // create and add shaders to the program
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource3D);
+    GLuint fragmentSahder = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource3D);
+
+    GLuint shaderProgram = linkShaderProgram(vertexShader, fragmentSahder);
+
+    glUseProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentSahder);
+
+    // Calculate the size of the cube in OpenGL coordinates based on the window size
+    float cubeSizeX = cube.w / screenWidth * 2.0f;
+    float cubeSizeY = cube.h / screenHeight * 2.0f;
+
+    // Calculate the position of the cube in OpenGL coordinates
+    float cubePosX = cube.x / screenWidth * 2.0f - 1.0f;
+    float cubePosY = 1.0f - cube.y / screenHeight * 2.0f;
+    float cubePosZ = cube.z; // Z-coordinate remains the same in OpenGL coordinates
+
+    // Adjust the vertices based on the calculated position and size
+    float vertices[] = {
+        // Vertex positions
+        cubePosX - cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 0
+        cubePosX + cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 1
+        cubePosX + cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 2
+        cubePosX - cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 3
+        cubePosX - cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 4
+        cubePosX + cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 5
+        cubePosX + cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 6
+        cubePosX - cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ + cubeSizeX / 2  // 7
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2, // Front face
+        2, 3, 0,
+        1, 5, 6, // Right face
+        6, 2, 1,
+        4, 7, 6, // Back face
+        6, 5, 4,
+        0, 3, 7, // Left face
+        7, 4, 0,
+        3, 2, 6, // Top face
+        6, 7, 3,
+        0, 4, 5, // Bottom face
+        5, 1, 0};
+
+    unsigned int VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    // make each object take this in, also take in a bCube which handles angle, x, y, z
+    glm_rotate_make(model, glm_rad(cube.angle), (vec3){cube.x, cube.y, cube.z});
+
+    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *)model);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float *)view);
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
+
+    GLint cubeColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
+    glUniform4f(cubeColorLocation, color.r, color.g, color.b, color.a);
+
+    glBindVertexArray(0);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteProgram(shaderProgram);
+}
+
+void drawCubes(bCube *cubes, int cubeSize, mat4 model, mat4 view, mat4 projection)
+{
+    // create and add shaders to the program
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource3D);
+    GLuint fragmentSahder = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource3D);
+
+    GLuint shaderProgram = linkShaderProgram(vertexShader, fragmentSahder);
+
+    glUseProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentSahder);
+
+    unsigned int VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    for (int i = 0; i < cubeSize; i++)
+    {
+        bCube cube = cubes[i];
+        
+        // Calculate the size of the cube in OpenGL coordinates based on the window size
+        float cubeSizeX = cube.w / screenWidth * 2.0f;
+        float cubeSizeY = cube.h / screenHeight * 2.0f;
+
+        // Calculate the position of the cube in OpenGL coordinates
+        float cubePosX = cube.x / screenWidth * 2.0f - 1.0f;
+        float cubePosY = 1.0f - cube.y / screenHeight * 2.0f;
+        float cubePosZ = cube.z; // Z-coordinate remains the same in OpenGL coordinates
+
+        // Adjust the vertices based on the calculated position and size
+        float vertices[] = {
+            // Vertex positions
+            cubePosX - cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 0
+            cubePosX + cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 1
+            cubePosX + cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 2
+            cubePosX - cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ - cubeSizeX / 2, // 3
+            cubePosX - cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 4
+            cubePosX + cubeSizeX / 2, cubePosY - cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 5
+            cubePosX + cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ + cubeSizeX / 2, // 6
+            cubePosX - cubeSizeX / 2, cubePosY + cubeSizeY / 2, cubePosZ + cubeSizeX / 2  // 7
+        };
+
+        unsigned int indices[] = {
+            0, 1, 2, // Front face
+            2, 3, 0,
+            1, 5, 6, // Right face
+            6, 2, 1,
+            4, 7, 6, // Back face
+            6, 5, 4,
+            0, 3, 7, // Left face
+            7, 4, 0,
+            3, 2, 6, // Top face
+            6, 7, 3,
+            0, 4, 5, // Bottom face
+            5, 1, 0};
+
+        glm_rotate_make(model, glm_rad(cube.angle), (vec3){cube.x, cube.y, cube.z});
+
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (float *)model);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (float *)view);
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection);
+
+        GLint cubeColorLocation = glGetUniformLocation(shaderProgram, "shapeColor");
+        glUniform4f(cubeColorLocation, cube.r, cube.g, cube.b, cube.a);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+        glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteProgram(shaderProgram);
 }
