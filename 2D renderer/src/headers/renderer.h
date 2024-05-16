@@ -21,6 +21,7 @@ GLFWwindow *initWindow(const char *title, int w, int h);
 bool Running(GLFWwindow *window);
 void cleanRenderer(GLFWwindow *window);
 void clearRenderer();
+void setWindowIcon(GLFWwindow *window, const char *path);
 
 // "input handling" (not full input just some helper stuff)
 void rendererPollEvents(GLFWwindow *window);
@@ -44,17 +45,5 @@ void drawLines(bLine *lines, int size);
 
 void drawImage(bImage image);
 void drawImages(bImage *images, int size);
-
-////////////////////////////////////////
-// 3D rendering
-////////////////////////////////////////
-
-// most likely pass in a model, projection a maybe a bCube struct?
-// view might not need to be passed since its basically the camera
-// however model and projection are basically essential to seeing and changing the object
-// ie. void drawCube(bCube cube, mat4 model, mat4 projection); probably every shape will be like this
-// do batch rendering for drawing multiple cubes (and other 3D objects) probably
-void drawCube(bCube cube, mat4 model, mat4 view, mat4 projection, bColor color);
-void drawCubes(bCube *cubes, int cubeSize, mat4 model, mat4 view, mat4 projection);
 
 #endif

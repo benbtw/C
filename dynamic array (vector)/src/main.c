@@ -25,7 +25,7 @@ int main()
     setValue(v, 6, 60);
     setValue(v, 7, 70);
     setValue(v, 8, 80);
-    setValue(v, 9, 90);
+    setValue(v, 9, 84);
 
     for(int i = 0; i < v->size; i++)
     {
@@ -36,3 +36,4 @@ int main()
 
     return 0;
 }
+

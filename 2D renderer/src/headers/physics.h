@@ -8,7 +8,8 @@
 #include <stdbool.h>
 #include <math.h>
 
-typedef struct bColor{
+typedef struct bColor
+{
     float r, g, b, a;
 } bColor;
 
@@ -101,48 +102,10 @@ typedef enum
 
 CollisionSide checkCollision(const bRect *rect1, const bRect *rect2);
 
+void calculateDeltaTime(float *dt);
+
 // Movement
 void Move(int *x, int *y, int speedX, int speedY, float dt);
 void jump(bRect *rect, float *gravity, int *jumpTimer, int maxTimer, int jumpSpeed, bool *isJumping, float deltaTime);
-
-/////////////////////////////////////////
-// 3D Physics stuff
-////////////////////////////////////////
-
-typedef enum cameraDirections{
-    CAMERA_UP,
-    CAMERA_DOWN,
-    CAMERA_LEFT,
-    CAMERA_RIGHT,
-    CAMERA_NONE
-} cameraDirections;
-
-typedef struct Camera
-{
-    vec3 position;
-    vec3 front;
-    vec3 up;
-    float horizontal;
-    float vertical;
-    float speed;
-    float sensitivity;
-} Camera;
-
-void moveCamera(cameraDirections direction, float cameraSpeed, vec3 *cameraPos, vec3 *cameraFront, vec3 *cameraUp);
-void moveCameraMouse(double xpos, double ypos, float *horizontal, float *vertical, vec3 *cameraFront);
-void updateCameraPos(mat4 *view, vec3 *cameraPos, vec3 *cameraFront, vec3 *cameraUp);
-void setFov(float FOV, mat4 *projection, int screenWidth, int screenHeight);
-
-////////////////////////////////////////
-// other 3D stuff
-////////////////////////////////////////
-
-typedef struct bCube
-{
-    float x, y, z;
-    float w, h;
-    float angle;
-    float r, g, b, a;
-} bCube;
 
 #endif
